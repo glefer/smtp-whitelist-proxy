@@ -1,0 +1,9 @@
+services:
+  smtp:
+    image: glefer/smtp-whitelist-proxy:latest
+    build:
+      context: .
+    environment:
+      MAILNAME: '<server_domain>'
+      # Optional environment variable
+      #WHITELIST_DOMAINS: 'domain1.fr:domain2.com'
