@@ -1,6 +1,6 @@
-FROM alpine:3.18.4
+FROM alpine:3.21.3
 
-RUN apk --update --no-cache add exim
+RUN apk --update --no-cache add exim openssl curl
 
 COPY config/* /etc/exim/ 
 COPY entrypoint.sh /bin/entrypoint.sh
