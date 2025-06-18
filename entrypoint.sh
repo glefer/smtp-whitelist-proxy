@@ -19,7 +19,12 @@ configure_mailname() {
 
 # Function to retrieve the public IP address from the ipify API
 get_public_ip(){
-    curl -s https://api.ipify.org/ || echo "Error: Unable to retrieve public IP address."
+    PUBLIC_IP=$(curl -s https://api.ipify.org)
+    if [ $? -ne 0 ]; then
+        echo "Error: Unable to retrieve public IP address." >&2
+        PUBLIC_IP=""
+    fi
+    echo "$PUBLIC_IP"
 }
 
 # Function to print the configuration summary
@@ -35,14 +40,15 @@ print_configuration() {
 	echo "v=spf1 a mx ip4:${PUBLIC_IP} -all"
 	echo ""
 	echo -e "\033[1mDKIM DNS TXT record\033[0m"
-    echo "${DKIM_SELECTOR}._domainkey.${MAILNAME} IN TXT \"v=DKIM1; k=rsa; p=$(openssl rsa -in "${DKIM_PRIVATE_KEY}" -pubout -outform PEM 2>/dev/null | sed '/^-----/d' | tr -d '\n')\""
+    PUBLIC_KEY=$(openssl rsa -in "${DKIM_PRIVATE_KEY}" -pubout -outform PEM 2>/dev/null | sed '/^-----/d' | tr -d '\n')
+    echo "${DKIM_SELECTOR}._domainkey.${MAILNAME} IN TXT \"v=DKIM1; k=rsa; p=${PUBLIC_KEY}\""
 	echo "=========================="
 	echo ""
 	
 }
 
 configure_dkim(){
-	if [ -z ${DKIM_PRIVATE_KEY} ]; then
+	if [ -z "${DKIM_PRIVATE_KEY}" ]; then
 		DKIM_PRIVATE_KEY="/etc/dkim/${MAILNAME}.key"
 		echo "DKIM_PRIVATE_KEY not set, using default: ${DKIM_PRIVATE_KEY}"
 	fi
