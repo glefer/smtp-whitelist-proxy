@@ -4,7 +4,7 @@ services:
     build:
       context: .
     environment:
-      MAILNAME: 'glefer.fr'
+      MAILNAME: 'mydomain.fr'
       # (Optional) domain to whitelist, defaults no whitelist
       #WHITELIST_DOMAINS: 'domain1.fr:domain2.com'
       # (Optional) Path where the private key is stored, defaults to /etc/dkim/${MAILNAME}.key 

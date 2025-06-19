@@ -50,6 +50,9 @@ smtp-1  | v=spf1 a mx ip4:X.X.X.X -all
 smtp-1  | 
 smtp-1  | DKIM DNS TXT record
 smtp-1  | default._domainkey.mydomain.fr IN TXT "v=DKIM1; k=rsa; p=XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+smtp-1  |
+smtp-1  | DMARC DNS TXT record
+smtp-1  | _dmarc.mydomain.fr IN TXT "v=DMARC1; p=none; rua=mailto:contact@mydomain.fr; sp=none; aspf=r; adkim=r; pct=100"
 smtp-1  | ==========================
 ```
 
@@ -66,6 +69,14 @@ The following information must be configured in your DNS:
    ```
    default._domainkey.mydomain.fr IN TXT "v=DKIM1; k=rsa; p=XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
    ```
+
+3. **DMARC (Domain-based Message Authentication, Reporting, and Conformance)**  
+   Add a TXT record based on the `DMARC DNS TXT record` line from the logs. For example:
+   ```
+   _dmarc.mydomain.fr IN TXT "v=DMARC1; p=none; rua=mailto:contact@mydomain.fr; sp=none; aspf=r; adkim=r; pct=100"
+   ```
+   This record helps specify the policy for handling emails that fail SPF or DKIM checks. It also allows you to receive reports about email authentication statistics.  
+   For more information, visit the [official DMARC website](https://dmarc.org/).
 
 ## Running the Image
 

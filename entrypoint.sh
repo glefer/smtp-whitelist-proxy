@@ -42,6 +42,10 @@ print_configuration() {
 	echo -e "\033[1mDKIM DNS TXT record\033[0m"
     PUBLIC_KEY=$(openssl rsa -in "${DKIM_PRIVATE_KEY}" -pubout -outform PEM 2>/dev/null | sed '/^-----/d' | tr -d '\n')
     echo "${DKIM_SELECTOR}._domainkey.${MAILNAME} IN TXT \"v=DKIM1; k=rsa; p=${PUBLIC_KEY}\""
+	echo ""
+	echo -e "\033[1mDMARC DNS TXT record\033[0m"
+	echo "_dmarc.${MAILNAME} IN TXT \"v=DMARC1; p=none; rua=mailto:contact@${MAILNAME}; sp=none; aspf=r; adkim=r; pct=100\""
+	echo ""
 	echo "=========================="
 	echo ""
 	
@@ -57,6 +61,8 @@ configure_dkim(){
 		echo "Warning: DKIM private key file ${DKIM_PRIVATE_KEY} does not exist. Generating a new key."
 		openssl genrsa -out "${DKIM_PRIVATE_KEY}" 2048
 		openssl rsa -in "${DKIM_PRIVATE_KEY}" -out "${DKIM_PRIVATE_KEY}.pub" -pubout -outform PEM
+		chown exim:exim "${DKIM_PRIVATE_KEY}"
+		chmod 600 "${DKIM_PRIVATE_KEY}"
 		echo "DKIM private key generated at ${DKIM_PRIVATE_KEY} and public key at ${DKIM_PRIVATE_KEY}.pub"
 		print_configuration
 	fi
@@ -64,9 +70,14 @@ configure_dkim(){
 
 configure_macro() {
   {
+	if [ -z "${DKIM_PRIVATE_KEY}" ]; then
+		DKIM_PRIVATE_KEY="/etc/dkim/${MAILNAME}.key"
+	fi
+
     [ -n "${WHITELIST_DOMAINS}" ] && echo "ALLOWED_DOMAINS=${WHITELIST_DOMAINS}"
     [ -n "${DKIM_PRIVATE_KEY}" ] && echo "DKIM_PRIVATE_KEY=${DKIM_PRIVATE_KEY}"
     [ -n "${DKIM_SELECTOR}" ] && echo "DKIM_SELECTOR=${DKIM_SELECTOR}"
+	[ -n "${MAILNAME}" ] && echo "MAILNAME=${MAILNAME}"
   } >> /etc/exim/macros.conf
 }
 
